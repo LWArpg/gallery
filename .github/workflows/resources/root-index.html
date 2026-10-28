@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,6 +20,65 @@
 <center>
     powered by <a href="https://www.tumblr.com/knownyurimaxxer" target="_blank" title="Créditos">@knownyurimaxxer</a>
 </center>
+
+<section id="upload-panel">
+  <h2>Subir imágenes</h2>
+  <form id="upload-form">
+    <label for="upload-password">Contraseña</label>
+    <input id="upload-password" type="password" required autocomplete="current-password">
+
+    <label for="upload-group">Grupo</label>
+    <input id="upload-group" name="group" type="text" placeholder="personajes" pattern="[a-z0-9]+(-[a-z0-9]+)*" required>
+
+    <label for="upload-subgroup">Subgrupo</label>
+    <input id="upload-subgroup" name="subgroup" type="text" placeholder="femeninos" pattern="[a-z0-9]+(-[a-z0-9]+)*" required>
+
+    <label for="upload-images">Imágenes (máximo 10, 4 MB cada una)</label>
+    <input id="upload-images" name="images" type="file" accept=".png,.jpg,.jpeg,.gif,.webp" multiple required>
+
+    <button type="submit">Subir imágenes</button>
+    <p id="upload-status" role="status" aria-live="polite"></p>
+  </form>
+</section>
 </div>
+
+<script>
+(() => {
+  const API = "https://gallery-upload.kissamimir.workers.dev";
+  const form = document.getElementById("upload-form");
+  const status = document.getElementById("upload-status");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const password = document.getElementById("upload-password").value;
+    const data = new FormData(form);
+    data.delete("upload-password");
+
+    status.textContent = "Subiendo imágenes…";
+
+    try {
+      const response = await fetch(API, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + password
+        },
+        body: data
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "No se pudo completar la subida.");
+      }
+
+      status.textContent = "Imágenes subidas a la rama " + result.branch + ".";
+      form.reset();
+    } catch (error) {
+      status.textContent = "Error: " + error.message;
+    }
+  });
+})();
+</script>
 </body>
 </html>
